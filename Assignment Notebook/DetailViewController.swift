@@ -9,39 +9,47 @@
 import UIKit
 
 class DetailViewController: UIViewController {
-
-    @IBOutlet weak var detailDescriptionLabel: UILabel!
-
+    
+    
     @IBOutlet weak var assignmentNameTextField: UITextField!
     @IBOutlet weak var courseTextField: UITextField!
     @IBOutlet weak var dueDateTextField: UITextField!
     @IBOutlet weak var detailsTextField: UITextField!
     
     
-    
-
-    func configureView() {
-        // Update the user interface for the detail item.
-        if let detail = detailItem {
-            if let label = detailDescriptionLabel {
-                label.text = detail.description
-            }
-        }
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        configureView()
-    }
-
-    var detailItem: NSDate? {
+    var detailItem: Assignment? {
         didSet {
             // Update the view.
             configureView()
         }
     }
-
-
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        configureView()
+    }
+    
+    func configureView() {
+        if let assignment = self.detailItem {
+            if assignmentNameTextField != nil {
+                assignmentNameTextField.text = assignment.assignmentName
+                courseTextField.text = assignment.course
+                dueDateTextField.text = String(assignment.dueDate)
+                detailsTextField.text = assignment.details
+            }
+        }
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        if let assignment = self.detailItem {
+            assignment.course = courseTextField.text!
+            assignment.dueDate = dueDateTextField.text!
+            assignment.details = detailsTextField.text!
+        }
+    }
+    
+    
+    
 }
 
