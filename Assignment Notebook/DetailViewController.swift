@@ -10,12 +10,10 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
-    
     @IBOutlet weak var assignmentNameTextField: UITextField!
     @IBOutlet weak var courseTextField: UITextField!
     @IBOutlet weak var dueDateTextField: UITextField!
     @IBOutlet weak var detailsTextField: UITextField!
-    
     
     var detailItem: Assignment? {
         didSet {
@@ -38,7 +36,6 @@ class DetailViewController: UIViewController {
                 detailsTextField.text = assignment.details
             }
         }
-        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -48,8 +45,4 @@ class DetailViewController: UIViewController {
             assignment.details = detailsTextField.text!
         }
     }
-    
-    
-    
 }
-

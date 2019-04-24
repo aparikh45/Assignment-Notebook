@@ -12,7 +12,7 @@ class MasterViewController: UITableViewController {
     
     var detailViewController: DetailViewController? = nil
     var assignments = [Assignment]()
-    
+    let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,12 +25,18 @@ class MasterViewController: UITableViewController {
             let controllers = split.viewControllers
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
+        if let savedData = defaults.object(forKey: "Data") as? Data {
+            if let decoded = try? JSONDecoder().decode([Assignment].self, from: savedData) {
+                assignments = decoded
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
         super.viewWillAppear(animated)
         tableView.reloadData()
+        saveData()
     }
     
     @objc
@@ -54,20 +60,27 @@ class MasterViewController: UITableViewController {
         let insertAction = UIAlertAction(title: "Add", style: .default) { (action) in
             let assignmentTextField = alert.textFields![0] as UITextField
             let dueDuteTextField = alert.textFields![1] as UITextField
-            let courseTextField = alert.textFields![3] as UITextField
-            let detailsTextField = alert.textFields![4] as UITextField
+            let courseTextField = alert.textFields![2] as UITextField
+            let detailsTextField = alert.textFields![3] as UITextField
             let assignment = Assignment(assignmentName: assignmentTextField.text!, course: courseTextField.text!, dueDate: dueDuteTextField.text!, details: detailsTextField.text!)
             self.assignments.append(assignment)
             self.tableView.reloadData()
+            self.saveData()
         }
         
         alert.addAction(insertAction)
         present(alert, animated: true, completion: nil)
     }
     
+    func saveData() {
+        if let encoded = try? JSONEncoder().encode(assignments) {
+            defaults.set(encoded, forKey: "Data")
+        }
+    }
+    
     // MARK: - Segues
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    override  func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             if let indexPath = tableView.indexPathForSelectedRow {
                 let object = assignments[indexPath.row]
@@ -98,7 +111,6 @@ class MasterViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
         return true
     }
     
@@ -106,11 +118,14 @@ class MasterViewController: UITableViewController {
         if editingStyle == .delete {
             assignments.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            saveData()
         } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
         }
     }
     
-    
+    override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        let objectToMove = assignments.remove(at: sourceIndexPath.row)
+        assignments.insert(objectToMove, at: destinationIndexPath.row)
+        saveData()
+    }
 }
-
